@@ -16,10 +16,11 @@ public:
     cmd_subscriber = this->create_subscription<std_msgs::msg::UInt32>(
         "/robot_cmd", 10, std::bind(&RobotControlNode::cmd_received, this, _1));
 
+    serial = std::make_shared<SimpleSerial>("/dev/ttyUSB0", 115200);
     // try
     // {
 
-    //   serial = std::make_shared<SimpleSerial>("/dev/ttyUSB0", 115200);
+    //   
     //   serial->writeString("f");
     // }
     // catch (boost::system::system_error &e)
