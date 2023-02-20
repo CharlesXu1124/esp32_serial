@@ -1,7 +1,7 @@
 #include <cstdio>
 #include "esp32_serial/SimpleSerial.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/u_int32.hpp"
+#include "std_msgs/msg/float32.hpp"
 
 using std::placeholders::_1;
 
@@ -11,10 +11,10 @@ public:
   RobotControlNode()
       : Node("robot_cmd_node")
   {
-    cmd_subscriber = this->create_subscription<std_msgs::msg::UInt32>(
-        "/robot_cmd", 10, std::bind(&RobotControlNode::cmd_received, this, _1));
+    cmd_subscriber = this->create_subscription<std_msgs::msg::Float32>(
+        "/rotary_cmd", 10, std::bind(&RobotControlNode::cmd_received, this, _1));
 
-    serial = std::make_shared<SimpleSerial>("/dev/ttyUSB2", 9600);
+    serial = std::make_shared<SimpleSerial>("/dev/ttyACM0", 115200);
     try
     {
 
@@ -27,35 +27,35 @@ public:
   }
 
 private:
-  void cmd_received(const std_msgs::msg::UInt32::SharedPtr cmd) const
+  void cmd_received(const std_msgs::msg::Float32::SharedPtr cmd) const
   {
-    if (cmd->data == 0)
-    {
-      serial->writeString("w");
-    }
 
-    if (cmd->data == 1)
+    if (cmd->data - 0.1f < 0.01)
     {
-      serial->writeString("s");
-    }
-
-    if (cmd->data == 2)
-    {
+      RCLCPP_INFO(this->get_logger(), "command received");
       serial->writeString("a");
     }
 
-    if (cmd->data == 3)
+    if (cmd->data - 0.2f < 0.01)
     {
-      serial->writeString("d");
+      RCLCPP_INFO(this->get_logger(), "command received");
+      serial->writeString("b");
     }
 
-    if (cmd->data == 4)
+    if (cmd->data - 0.3f < 0.01)
     {
-      serial->writeString(" ");
+      RCLCPP_INFO(this->get_logger(), "command received");
+      serial->writeString("c");
+    }
+
+    if (cmd->data - 0.4f < 0.01)
+    {
+      RCLCPP_INFO(this->get_logger(), "command received");
+      serial->writeString("d");
     }
   }
 
-  rclcpp::Subscription<std_msgs::msg::UInt32>::SharedPtr cmd_subscriber;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr cmd_subscriber;
   std::shared_ptr<SimpleSerial> serial;
 };
 
